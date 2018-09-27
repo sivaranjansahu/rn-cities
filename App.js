@@ -9,7 +9,8 @@
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, ScrollView } from 'react-native';
 import Cityinput from './src/components/cityinput/cityinput';
-import Citylist from './src/components/citylist/citylist'
+import Citylist from './src/components/citylist/citylist';
+import CityDetails from './src/components/citydetails/citydetails'
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -24,6 +25,7 @@ export default class App extends Component<Props> {
   state = {
     cityfield: '',
     cities: [],
+    selectedCity:null
 
   }
 
@@ -31,8 +33,13 @@ export default class App extends Component<Props> {
     if (this.state.cityfield != '') {
       this.setState((prevState) => ({
         cities: prevState.cities.concat({
-          key:Math.random(),
-          value:prevState.cityfield
+          key: Math.random().toString(),
+          value: prevState.cityfield,
+          image: {
+            uri: "https://www.mikesbiketours.com/munich/images/Tour%20Photos%20570X%20380/Munich-&-Beyond.jpg",
+            height: 250,
+            width: 350
+          }
         }),
         cityfield: ''
 
@@ -55,15 +62,35 @@ export default class App extends Component<Props> {
     this.setState((prevState) => {
       return {
         cities: prevState.cities.filter((place) => {
-          return place.key !=key
+          return place.key != key
         })
       }
+    })
+  }
+
+  placeSelectedHandler = (key) => {
+    this.setState(prevState => {
+      return {
+        selectedCity: prevState.cities.find(city => {
+          return city.key === key
+        })
+      }
+    })
+  }
+
+  closeModal=()=>{
+    this.setState(prevState=>{
+      return{
+        selectedCity:null
+      }
+      
     })
   }
   render() {
 
     return (
       <View style={styles.container}>
+        <CityDetails selectedCity={this.state.selectedCity} closeModal={this.closeModal}  />
         <Cityinput
           addHandler={this.addHandler}
           val={this.state.cityfield}
@@ -71,7 +98,7 @@ export default class App extends Component<Props> {
         />
         <Citylist
           list={this.state.cities}
-          onItemDeleted={this.placeDeleteHandler}
+          onItemDeleted={this.placeSelectedHandler}
         />
       </View>
     );
@@ -84,7 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     width: '100%',
-    padding:15
+    padding: 15
 
   },
   inputContainer: {
